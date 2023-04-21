@@ -5,11 +5,12 @@ import { UserModule } from '~/user/user.module'
 import { PrismaModule } from '~/prisma/prisma.module'
 import { AuthService } from './auth.service'
 import { FileModule } from '~/file/file.module'
+import { env } from '~/env'
 
 @Module({
   imports: [
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
+      secret: env.JWT_SECRET,
     }),
     forwardRef(() => UserModule),
     PrismaModule,

@@ -8,6 +8,7 @@ import { APP_GUARD } from '@nestjs/core'
 import { ConfigModule } from '@nestjs/config'
 import { MailerModule } from '@nestjs-modules/mailer'
 import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter'
+import { env } from './env'
 
 @Module({
   imports: [
@@ -21,11 +22,11 @@ import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter'
     forwardRef(() => AuthModule),
     MailerModule.forRoot({
       transport: {
-        host: process.env.MAILER_HOST,
-        port: Number(process.env.MAILER_PORT),
+        host: env.MAILER_HOST,
+        port: Number(env.MAILER_PORT),
         auth: {
-          user: process.env.MAILER_USER,
-          pass: process.env.MAILER_PASS,
+          user: env.MAILER_USER,
+          pass: env.MAILER_PASS,
         },
       },
       defaults: {
