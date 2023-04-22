@@ -9,6 +9,8 @@ import { ConfigModule } from '@nestjs/config'
 import { MailerModule } from '@nestjs-modules/mailer'
 import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter'
 import { env } from './env'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { UserEntity } from './user/entity/user.entity'
 
 @Module({
   imports: [
@@ -39,6 +41,16 @@ import { env } from './env'
           strict: true,
         },
       },
+    }),
+    TypeOrmModule.forRoot({
+      type: 'mysql',
+      host: env.DB_HOST,
+      port: env.DB_PORT,
+      username: env.DB_USERNAME,
+      password: env.DB_PASSWORD,
+      database: env.DB_DATABASE,
+      entities: [UserEntity],
+      synchronize: env.NODE_ENV === 'development',
     }),
   ],
   controllers: [AppController],

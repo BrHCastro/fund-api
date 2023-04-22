@@ -5,13 +5,14 @@ import {
   UnauthorizedException,
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { User } from '@prisma/client'
 import * as bcrypt from 'bcrypt'
 
-import { PrismaService } from '~/prisma/prisma.service'
 import { AuthRegisterDTO } from './dto/auth-register.dto'
 import { UserService } from '~/user/user.service'
 import { MailerService } from '@nestjs-modules/mailer'
+import { UserEntity } from '~/user/entity/user.entity'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Repository } from 'typeorm'
 
 @Injectable()
 export class AuthService {
@@ -20,12 +21,13 @@ export class AuthService {
 
   constructor(
     private readonly jwtService: JwtService,
-    private readonly prismaService: PrismaService,
     private readonly userService: UserService,
     private readonly mailerService: MailerService,
+    @InjectRepository(UserEntity)
+    private usersRepository: Repository<UserEntity>,
   ) {}
 
-  createToken(user: User) {
+  createToken(user: UserEntity) {
     return {
       accessToken: this.jwtService.sign(
         {
@@ -34,7 +36,7 @@ export class AuthService {
         },
         {
           expiresIn: '7 days',
-          subject: user.id,
+          subject: String(user.id),
           issuer: this.issuer,
           audience: this.audience,
         },
@@ -66,12 +68,11 @@ export class AuthService {
 
   async signUp(data: AuthRegisterDTO) {
     const user = await this.userService.create(data)
-
     return this.createToken(user)
   }
 
   async signIn(email: string, password: string) {
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.usersRepository.findOne({
       where: {
         email,
       },
@@ -89,7 +90,7 @@ export class AuthService {
   }
 
   async forget(email: string) {
-    const user = await this.prismaService.user.findUnique({
+    const user = await this.usersRepository.findOne({
       where: {
         email,
       },
@@ -104,7 +105,7 @@ export class AuthService {
         id: user.id,
       },
       {
-        expiresIn: '30 minutes',
+        expiresIn: '25 minutes',
         subject: user.id,
         issuer: 'forget',
         audience: 'users',
@@ -129,16 +130,12 @@ export class AuthService {
         issuer: 'forget',
         audience: 'users',
       })
-
       const salt = await bcrypt.genSalt()
-      const user = await this.prismaService.user.update({
-        data: {
-          password: await bcrypt.hash(password, salt),
-        },
-        where: {
-          id,
-        },
+      await this.usersRepository.update(id, {
+        password: await bcrypt.hash(password, salt),
       })
+
+      const user = await this.userService.getById(id)
 
       return this.createToken(user)
     } catch (error) {
