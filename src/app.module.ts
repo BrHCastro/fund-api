@@ -50,7 +50,7 @@ import { UserEntity } from './user/entity/user.entity'
       password: env.DB_PASSWORD,
       database: env.DB_DATABASE,
       entities: [UserEntity],
-      synchronize: env.NODE_ENV === 'development',
+      // synchronize: env.NODE_ENV === 'development',
     }),
   ],
   controllers: [AppController],
