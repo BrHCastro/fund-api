@@ -6,12 +6,12 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
-import { Role } from '~/enums/role.enum'
+import { Role } from '../../enums/role.enum'
 
 @Entity('users')
 export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: string
+  id?: string
 
   @Column()
   name: string
@@ -23,14 +23,14 @@ export class UserEntity {
   password: string
 
   @CreateDateColumn()
-  created_at: string
+  created_at?: Date
 
   @UpdateDateColumn()
-  updated_at: string
+  updated_at?: Date
 
   @DeleteDateColumn({ nullable: true })
-  deleted_at: string
+  deleted_at?: Date
 
   @Column({ nullable: true, default: Role.User })
-  role: number
+  role?: number
 }
